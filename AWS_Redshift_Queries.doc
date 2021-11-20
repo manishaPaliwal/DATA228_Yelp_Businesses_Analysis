@@ -1,0 +1,405 @@
+
+AWS Redshift Queries:
+_____________________________
+
+###Create table queries:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+create table yelp.yelp_business(	business_id	varchar	,	
+	name	varchar	,	
+	neighborhood	varchar	,	
+	address	varchar	,	
+	city	varchar	,	
+	postal_code	varchar	,	
+	stars	numeric	,	
+	review_count	int4	,	
+	is_open	int4	,	
+	attributes_goodforkids	varchar	,	
+	attributes_businessacceptscreditcards	varchar	,	
+	hours.saturday	varchar	,	
+	attributes_restaurantsgoodforgroups	varchar	,	
+	attributes_noiselevel	varchar	,	
+	attributes_hastv	varchar	,	
+	hours.sunday	varchar	,	
+	attributes_restaurantsattire	varchar	,	
+	hours.thursday	varchar	,	
+	attributes_dogsallowed	varchar	,	
+	attributes_restaurantstableservice	varchar	,	
+	attributes_acceptsinsurance	varchar	,	
+	hours.friday	varchar	,	
+	attributes_outdoorseating	varchar	,	
+	attributes_restaurantspricerange2	varchar	,	
+	attributes_happyhour	varchar	,	
+	attributes_corkage	varchar	,	
+	attributes_wifi	varchar	,	
+	attributes_music	varchar	,	
+	attributes_restaurantsdelivery	varchar	,	
+	attributes_bestnights	varchar	,	
+	attributes_byobcorkage	varchar	,	
+	attributes_restaurantscounterservice	varchar	,	
+	hours.tuesday	varchar	,	
+	attributes_drivethru	varchar	,	
+	hours.wednesday	varchar	,	
+	attributes_smoking	varchar	,	
+	attributes_caters	varchar	,	
+	attributes_alcohol	varchar	,	
+	attributes_bikeparking	varchar	,	
+	attributes_byob	varchar	,	
+	attributes_restaurantstakeout	varchar	,	
+	attributes_byappointmentonly	varchar	,	
+	attributes_coatcheck	varchar	,	
+	hours.monday	varchar	,	
+	categories	varchar	,	
+	attributes_restaurantsreservations	varchar	,	
+	attributes_wheelchairaccessible	varchar	,	
+	attributes_goodfordancing	varchar	,	
+	attributes_businessacceptsbitcoin	varchar	,	
+	stars_double	float8	,	
+	latitude_double	float8	,	
+	longitude_double	float8		)
+
+create table yelp_review (	review_id	varchar	,
+	user_id	varchar	,
+	stars	varchar	,
+	date	varchar	,
+	text	varchar	,
+	useful	varchar	,
+	funny	varchar	,
+	cool	varchar	,
+	business_id	varchar	)
+			
+			
+			
+create table yelp_business_ambience_attribute(	casual	varchar	,
+	classy	varchar	,
+	divey	varchar	,
+	hipster	varchar	,
+	intimate	varchar	,
+	romantic	varchar	,
+	touristy	varchar	,
+	trendy	varchar	,
+	upscale	varchar	,
+	business_id_orig	varchar	)
+
+create table yelp.public.countywise_average_income
+( County	varchar	,
+State	varchar	,
+Estimate_Households_Total	float8,	
+Estimate_Households_Total_Less_than_1""	float8,	
+Estimate_Households_Total_1""_14999	float8	,
+Estimate_Households_Total_15"0_24999	float8	,
+Estimate_Households_Total_25"0_34999	float8	,
+Estimate_Households_Total_35"0_49999	float8	,
+Estimate_Households_Total_5""_74999	float8	,
+Estimate_Households_Total_75"0_99999	float8	,
+Estimate_Households_Total_1""0_149999	float8	,
+Estimate_Households_Total_15""_199999	float8	,
+Estimate_Households_Total_greater_than_2""0	float8	,
+Estimate_Households_Median_income	float8	,
+Estimate_Households_Mean_income	float8	,
+Estimate_Households_PERCENT_ALLOCATED_Household_income	float8,
+State_Code varchar);
+
+create table yelp.yelp.Zip_Code (zip	varchar	,
+type	varchar	,
+state	varchar	,
+county	varchar	,
+country	varchar	,
+latitude	float8	,
+longitude	float8	,
+irs_estimated_population	varchar	);
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Primary and Foriegn Key Creation Queries
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Business Table:
+
+ALTER TABLE yelp.yelp_business1 ADD COLUMN  business_id_new varchar(256) NOT NULL  default 'a';
+update yelp.yelp_business1 set business_id_new=business_id;
+alter table yelp.yelp_business1 drop column business_id;
+alter table yelp.yelp_business1 rename business_id_new to business_id;
+drop table yelp.yelp.yelp_business;
+alter table yelp.yelp_business1 rename to yelp_business;
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+AWS Copy Commands to insert data in AWS Redshift
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Yelp_Review Table:
+
+COPY yelp.yelp_review
+FROM 's3://yelpdata228-s3/inbound/Yelp_Review.json'
+IGNOREHEADER 1
+emptyasnull
+blanksasnull
+CREDENTIALS 'aws_iam_role=arn:aws:iam::501037219672:role/RedShiftRoleYelpData228'
+json 's3://yelpdata228-s3/inbound/yelp_review_jsonpath.json';
+
+
+Zip_Code Table:
+
+
+COPY yelp.yelp.Zip_Code
+FROM 's3://yelpdata228-s3/inbound/Zip_Code.txt'
+DELIMITER '|'
+IGNOREHEADER 1
+CREDENTIALS 'aws_iam_role=arn:aws:iam::501037219672:role/RedShiftRoleYelpData228'
+removequotes
+emptyasnull
+blanksasnull
+maxerror 5;
+
+Business_Ambience_Attribute Table:
+
+COPY yelp.yelp.yelp_business_ambience_attribute
+FROM 's3://yelpdata228-s3/inbound/Business_Ambience_Attributes.csv'
+DELIMITER ','
+IGNOREHEADER 1
+CREDENTIALS 'aws_iam_role=arn:aws:iam::501037219672:role/RedShiftRoleYelpData228'
+removequotes
+emptyasnull
+blanksasnull
+maxerror 5;
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+AWS Visualization Queries
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Graph: County_vs_Restaurant_vs_Income_Top_12_HighestNoResturantPlaces
+
+		select b.business_id, b.postal_code,b.categories,b.stars_double,
+		b.attributes_restaurantspricerange2,z.county,i.estimate_households_total,i.state_code
+		from
+		yelp.yelp.yelp_business b,yelp.yelp.zip_code z ,yelp.yelp.countywise_average_income i
+		where 
+		b.postal_code=z.zip
+		and z.county=i.county
+		and z.state=i.state_code
+		and b.categories like '%Restaurants%'
+		
+Graph: DistributionOfResturantsPriceRangeBasedOnIncome
+
+		select b.business_id,nvl(b.attributes_restaurantspricerange2, 'Not Available') as restaurantsPriceRange,
+		CASE i.estimate_households_total  
+		WHEN i.estimate_households_total <200000 THEN '<200k'
+		WHEN (i.estimate_households_total >200000 and i.estimate_households_total<300000) THEN '>200k and <300k'
+		WHEN (i.estimate_households_total >300000 and i.estimate_households_total<400000) THEN '>300k and <400k'
+		WHEN (i.estimate_households_total >400000 and i.estimate_households_total<500000) THEN '>400k and <500k'
+		WHEN (i.estimate_households_total >500000 and i.estimate_households_total<600000) THEN '>500k and <600k'
+		WHEN (i.estimate_households_total >600000 and i.estimate_households_total<700000) THEN '>600k and <700k'
+		ELSE '>700k'
+		END Income_range
+		from
+		yelp.yelp.yelp_business b,yelp.yelp.zip_code z ,yelp.yelp.countywise_average_income i
+		where 
+		b.postal_code=z.zip
+		and z.county=i.county
+		and z.state=i.state_code
+		and b.categories like '%Restaurants%'	
+
+Graph: Wordcloud of Cuisines (Excel)
+
+		
+
+Graph: Average Rating of Top Ten Resturants Across State
+
+		select  b.name, sum(r.stars)/count(r.stars) as average_rating,b.state
+		from
+		yelp.yelp.yelp_business b, yelp.yelp_review r, yelp.yelp.zip_code z
+		where 
+		b.business_id=r.business_id and
+		b.postal_code=z.zip
+		and b.categories like '%Restaurants%' and name in ('Subway','McDonald''s','Wendy''s','Burger King','Taco Bell','Domino''s Pizza','Chipotle Mexican Grill','Pizza Hut','Panera Bread','Dunkin''')
+		group by b.name ,b.state
+		order by b.name,b.state
+		
+Graph: Top Ten Resturants by Count
+
+		select count(*), b.name
+		from
+		yelp.yelp.yelp_business b,yelp.yelp.zip_code z
+		where 
+		b.postal_code=z.zip
+		and b.categories like '%Restaurants%' 
+		group by b.name having count(*) >131
+		order by count(*) desc
+
+Graph: Number of Reviews vs Average Rating
+
+select count(r.review_id) as count_of_reviews, b.stars_double, b.business_id
+from yelp.yelp.yelp_business b left join  yelp.yelp.yelp_review r
+on b.business_id=r.business_id
+where b.categories like '%Restaurants%'
+group by  b.stars_double, b.business_id 
+order by  b.stars_double, b.business_id 
+
+Graph: Relation between Average Length of Review and Review Rating
+
+select sum(len(r.text))/count(r.text) average_length_of_text,r.stars
+from yelp.yelp.yelp_review r join yelp.yelp.yelp_business b 
+on b.business_id=r.business_id
+where b.categories like '%Restaurants%'
+group by r.stars 
+order by r.stars desc;
+
+Graph: Comparision of Ambience of Restaurants in Price Range $$
+
+SELECT
+    a.stars,
+cast( RATIO_TO_REPORT(sum(case when UPPER(c.casual) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Casual",
+cast( RATIO_TO_REPORT(sum(case when UPPER(c.classy) is not null then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Classy",    cast( RATIO_TO_REPORT(sum(case when UPPER(c.upscale) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Upscale",
+cast( RATIO_TO_REPORT(sum(case when UPPER(c.trendy) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Trendy ",
+cast( RATIO_TO_REPORT(sum(case when UPPER(c.divey) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Divey",
+cast( RATIO_TO_REPORT(sum(case when UPPER(c.trendy) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Trendy",    cast( RATIO_TO_REPORT(sum(case when UPPER(c.hipster) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Hipster"                                                                                           from yelp.yelp_business  b
+join yelp.yelp_review a on a.business_id=b.business_id
+join yelp.yelp_business_ambience_attribute c on a.business_id=c.business_id_orig
+where b.attributes_restaurantspricerange2 =2 and b.categories like '%Restaurants%'
+group by a.stars
+order by 1
+
+Graph: Comparision of Business Attributes of Restaurants in Price Range $$
+
+SELECT
+    a.stars,
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_dogsallowed) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Dogs Allowed",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_noiselevel) is not null then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Noise Level",                                                                                       cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_goodforkids) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Good for Kids",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_hastv) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "TV ",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_happyhour) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Happy Hour",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_restaurantsgoodforgroups) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Good For Groups"                                                                                 from yelp.yelp_business  b
+join yelp.yelp_review a on a.business_id=b.business_id
+where b.attributes_restaurantspricerange2 =2 and b.categories like '%Restaurants%'
+group by a.stars
+order by 1
+
+Graph: Reviews By Years
+
+select to_date(a.date,'YYYY') as year , sum(cast(b.review_count as integer)) from
+yelp.yelp_review a join yelp.yelp_business b on a.business_id=b.business_id
+where b.categories like '%Restaurants%'
+group by year 
+order by 1
+
+
+Graph: Relationship between Restaurant Price Range and Reviewer Rating
+
+select b.attributes_restaurantspricerange2, a.stars, count(a.stars)
+from 
+yelp.yelp_review a join yelp.yelp_business b on a.business_id=b.business_id
+where b.attributes_restaurantspricerange2 not in ('None', ' ') and b.categories like '%Restaurants%'
+group by a.stars, b.attributes_restaurantspricerange2
+order by 1,2
+
+Graph: Business review counts with more analysis on stars count for review count segments 1 - 50 and 50 - 100  
+
+SELECT
+    a.stars,
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_dogsallowed) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Dogs Allowed",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_noiselevel) is not null then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Noise Level",                                                                                                                     
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_goodforkids) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Good for Kids",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_hastv) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "TV ",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_happyhour) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Happy Hour",
+cast( RATIO_TO_REPORT(sum(case when UPPER(b.attributes_restaurantsgoodforgroups) = 'TRUE'  then 1 else 0 end)) OVER () as decimal(18,2)) *100 "Good For Groups"                                                                                                                 
+from yelp.yelp_business  b
+join yelp.yelp_review a on a.business_id=b.business_id
+where b.attributes_restaurantspricerange2 =2
+group by a.stars
+order by 1
+
+
+select 
+    sum(case when (review_count >1 and review_count < 50) then 1 else 0 end) as "0-50",
+    sum(case when (review_count >50 and review_count < 100) then 1 else 0 end) as "50-100",
+	--sum(case when (review_count >1 and review_count < 100) then 1 else 0 end) as "0-100",
+    sum(case when (review_count >100 and review_count < 200) then 1 else 0 end) as "100-200",
+    sum(case when (review_count >200 and review_count < 300) then 1 else 0 end) as "200-300",
+    sum(case when (review_count >300 and review_count < 400) then 1 else 0 end) as "300-400",
+    sum(case when (review_count >400 and review_count < 500) then 1 else 0 end) as "400-500",
+    sum(case when (review_count >500 and review_count < 1000) then 1 else 0 end) as "500-1000",
+    sum(case when (review_count >1000 and review_count < 2000) then 1 else 0 end) as "1000-2000",
+    sum(case when (review_count >2000 and review_count < 3000) then 1 else 0 end) as "2000-3000",
+    sum(case when (review_count >3000 and review_count < 4000) then 1 else 0 end) as "3000-4000",
+    sum(case when (review_count >4000 and review_count < 5000) then 1 else 0 end) as "4000-5000",
+    sum(case when (review_count >5000 and review_count < 6000) then 1 else 0 end) as "5000-6000",
+    sum(case when (review_count >6000 and review_count < 7000) then 1 else 0 end) as "6000-7000",
+    sum(case when (review_count >7000) then 1 else 0 end) as ">7000"
+from yelp.yelp_business 
+where categories like '%Restaurants%'
+order by 1
+
+
+
+select stars, num_reviews*100/tot_cnt as "percent_reviews" from(
+select stars_double as "stars", count(stars_double) "num_reviews",
+  (select 
+    sum(case when (review_count >1 and review_count < 50) then 1 else 0 end) from yelp.yelp_business where categories like '%Restaurants%') tot_cnt
+from yelp.yelp_business
+where review_count >1 and review_count < 50 -- 3.6
+and categories like '%Restaurants%'
+group by stars_double
+order by 1)
+
+
+select stars, num_reviews*100/tot_cnt as "percent1" from(
+select stars_double as "stars", count(stars_double) "num_reviews",
+  (select 
+    sum(case when (review_count >50 and review_count < 100) then 1 else 0 end) from yelp.yelp_business where categories like '%Restaurants%') tot_cnt
+from yelp.yelp_business
+where review_count > 50 and review_count < 100 -- 3.6
+and categories like '%Restaurants%'
+group by stars_double
+order by 1)
+
+
+
+Graph: Effect of Business Attributes on Stars and Reviews
+
+select yb.name, yb.state, yr.stars, yb.stars_double, yb.review_count, yb.attributes_businessacceptscreditcards, yb.attributes_restaurantstableservice,
+yb.attributes_restaurantsgoodforgroups, yb.attributes_wifi from yelp.yelp.yelp_business as yb, yelp.yelp.yelp_review as yr 
+where yb.business_id = yr.business_id 
+and categories like '%Restaurants%'
+
+
+
+Graph: Effect of Food Categories on Ratings
+
+select yb.categories, yr.stars, yr.text, yr.useful, yr.funny, yr.cool
+from yelp.yelp.yelp_business as yb, yelp.yelp.yelp_review as yr  
+where yb.business_id = yr.business_id
+and categories like '%Restaurants%' limit 1000 ---------> to big to get it without limit 
+
+
+Graph: Comparison between Ambience VS Estimated Average Income Range
+
+select BA.casual,
+BA.classy,
+BA.divey,
+BA.hipster,
+BA.intimate,
+BA.romantic,
+BA.touristy,
+BA.trendy,
+BA.upscale,
+CASE i.estimate_households_total  
+		WHEN i.estimate_households_total <200000 THEN '<200k'
+		WHEN (i.estimate_households_total >200000 and i.estimate_households_total<300000) THEN '>200k and <300k'
+		WHEN (i.estimate_households_total >300000 and i.estimate_households_total<400000) THEN '>300k and <400k'
+		WHEN (i.estimate_households_total >400000 and i.estimate_households_total<500000) THEN '>400k and <500k'
+		WHEN (i.estimate_households_total >500000 and i.estimate_households_total<600000) THEN '>500k and <600k'
+		WHEN (i.estimate_households_total >600000 and i.estimate_households_total<700000) THEN '>600k and <700k'
+		ELSE '>700k'
+		END Income_range
+from 
+yelp.yelp.yelp_business b,yelp.yelp.zip_code z ,yelp.yelp.countywise_average_income i,
+yelp.yelp.yelp_business_ambience_attribute as BA
+where 
+b.postal_code=z.zip
+and z.county=i.county
+and z.state=i.state_code 
+and b.business_id = BA.business_id_orig
+and b.categories like '%Restaurants%' ; 

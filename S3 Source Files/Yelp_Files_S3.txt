@@ -1,0 +1,7 @@
+Below files are in GB and are not uploaded in GitHub. 
+
+You may refer then at 
+
+Yelp Business : https://www.yelp.com/dataset
+
+Yelp Review: https://www.yelp.com/dataset
